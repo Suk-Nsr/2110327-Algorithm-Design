@@ -1,75 +1,52 @@
-#include <iostream>
 #include <vector>
+#include <iostream>
+#include <limits.h>
+#include <algorithm>
 
-int maxScoreCalculation(std::vector<std::vector<int>> &scoreTable, int currentRow, int currentColumn, int & targetRow, int & targetColumn, int cumulativeScore, bool diagonal)
+int rowCount, columnCount;
+
+int calculateMaxScore(std::vector<std::vector<int>> & scoreTable, std::vector<std::vector<int>> & scoreMaxingMem, int currentRow, int currentColumn)
 {
-    if (diagonal)
+    if (currentRow < 1 || currentColumn < 1)
     {
-        cumulativeScore += scoreTable[currentRow][currentColumn] * 2;
-    }
-    else
-    {
-        cumulativeScore += scoreTable[currentRow][currentColumn];
+        return INT_MIN;
     }
 
-    if (currentRow == targetRow && currentColumn == targetColumn)
+    if (currentRow == 1 && currentColumn == 1)
     {
-        return cumulativeScore;
+        return scoreTable[1][1];
     }
 
-    int score1 = 0, score2 = 0, score3 = 0;
-
-    if (currentRow < targetRow)
+    if (scoreMaxingMem[currentRow][currentColumn] != -1)
     {
-        score1 = maxScoreCalculation(scoreTable, currentRow + 1, currentColumn, targetRow, targetColumn, cumulativeScore, false);
+        return scoreMaxingMem[currentRow][currentColumn];
     }
 
-    if (currentColumn < targetColumn)
-    {
-        score2 = maxScoreCalculation(scoreTable, currentRow, currentColumn + 1, targetRow, targetColumn, cumulativeScore, false);
-    }
+    int scoreFromTop = calculateMaxScore(scoreTable, scoreMaxingMem, currentRow - 1, currentColumn) + scoreTable[currentRow][currentColumn];
+    int scoreFromLeft = calculateMaxScore(scoreTable, scoreMaxingMem, currentRow, currentColumn - 1) + scoreTable[currentRow][currentColumn];
+    int scoreFromDiagonal = calculateMaxScore(scoreTable, scoreMaxingMem, currentRow - 1, currentColumn - 1) + (scoreTable[currentRow][currentColumn] * 2);
 
-    if (currentRow < targetRow && currentColumn < targetColumn)
-    {
-        score3 = maxScoreCalculation(scoreTable, currentRow + 1, currentColumn + 1, targetRow, targetColumn, cumulativeScore, true);
-    }
-
-    if (score1 >= score2 && score1 >= score3)
-    {
-        return score1;
-    }
-
-    if (score2 >= score1 && score2 >= score3)
-    {
-        return score2;
-    }
-
-    if (score3 >= score1 && score3 >= score2)
-    {
-        return score3;
-    }
+    scoreMaxingMem[currentRow][currentColumn] = std::max({scoreFromTop, scoreFromLeft, scoreFromDiagonal});
+    
+    return scoreMaxingMem[currentRow][currentColumn];
 }
 
 int main()
 {
     std::ios_base::sync_with_stdio(false);
-    std::cin.tie(NULL);
+    std::cin.tie(0);
 
-    int row, column;
-    std::cin >> row >> column;
+    std::cin >> rowCount >> columnCount;
+    std::vector<std::vector<int>> scoreTable(rowCount + 1, std::vector<int>(columnCount + 1));
+    std::vector<std::vector<int>> scoreMaxingMem(rowCount + 1, std::vector<int>(columnCount + 1, -1));
 
-    std::vector<std::vector<int>> scoreTable(row, std::vector<int>(column));
-
-    for (int i = 0; i < row; ++i)
+    for (int i = 1; i <= rowCount; ++i)
     {
-        for (int j = 0; j < column; ++j)
+        for (int j = 1; j <= columnCount; ++j)
         {
             std::cin >> scoreTable[i][j];
         }
     }
 
-    --row;
-    --column;
-
-    std::cout << maxScoreCalculation(scoreTable, 0, 0, row, column, 0, false);
+    std::cout << calculateMaxScore(scoreTable, scoreMaxingMem, rowCount, columnCount);
 }
