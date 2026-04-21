@@ -57,13 +57,6 @@ int main()
                     queue.push({newRow, newColumn});
                     continue;
                 }
-
-                if (distance[newRow][newColumn] > distance[currentRow][currentColumn] + 1)
-                {
-                    distance[newRow][newColumn] = distance[currentRow][currentColumn] + 1;
-                    queue.push({newRow, newColumn});
-                    continue;
-                }
             }
         }
 
